@@ -115,6 +115,14 @@ This repo includes validation hooks that run on `git commit`:
 ./setup-hooks.sh
 ```
 
+### Optional: PyYAML for full YAML validation
+
+The YAML syntax check works best with PyYAML installed. Without it, only basic checks (tab detection) run.
+
+```bash
+pip3 install --break-system-packages --user pyyaml
+```
+
 ### Test manually
 
 ```bash
