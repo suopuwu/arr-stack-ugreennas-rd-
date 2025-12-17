@@ -10,26 +10,15 @@ This project provides configuration files for **legal, open-source software** de
 
 ---
 
-## Getting Started
+## Documentation
 
-**[Setup Guide](docs/SETUP.md)** - Complete step-by-step instructions for deployment.
-
-<details>
-<summary>Using Claude Code for guided setup (optional)</summary>
-
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) can walk you through deployment step-by-step, executing commands and troubleshooting as you go.
-
-**VS Code / Cursor:** Install the Claude extension, open this folder, and start a chat.
-
-**Terminal:**
-```bash
-npm install -g @anthropic-ai/claude-code
-cd arr-stack-ugreennas && claude
-```
-
-Ask Claude to help deploy the stack - it reads the [`.claude/instructions.md`](.claude/instructions.md) file automatically.
-
-</details>
+| Doc | Purpose |
+|-----|---------|
+| **[Setup Guide](docs/SETUP.md)** | Step-by-step deployment |
+| [Quick Reference](docs/REFERENCE.md) | URLs, commands, IPs |
+| [Updating](docs/UPDATING.md) | Pull updates, redeploy |
+| [Home Assistant](docs/HOME-ASSISTANT.md) | Notifications integration |
+| [Legal](docs/LEGAL.md) | Intended use, disclaimer |
 
 ---
 
