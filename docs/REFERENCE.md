@@ -25,7 +25,7 @@
 | Uptime Kuma | .13 | 3001 | Monitoring |
 | duc | — | 8838 | Disk usage |
 
-> **Connecting services:** qBittorrent, Sonarr, Radarr, and Prowlarr share Gluetun's network. When configuring download clients, use host `gluetun` or IP `192.168.100.3`.
+> **Connecting VPN services:** qBittorrent, Sonarr, Radarr, and Prowlarr share Gluetun's network stack. Use `localhost` when connecting them to each other (e.g., Sonarr → qBittorrent: `localhost:8085`). Services outside gluetun (like Jellyseerr) reach them via `192.168.100.3`.
 
 ## Common Commands
 

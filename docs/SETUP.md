@@ -466,9 +466,9 @@ docker exec gluetun wget -qO- ifconfig.me
    - **Note:** FlareSolverr doesn't bypass all Cloudflare protections - some indexers may still fail. Non-protected indexers are more reliable.
 4. **Connect to Sonarr:**
    - Settings → Apps → Add → Sonarr
-   - Sonarr Server: `http://sonarr:8989`
+   - Sonarr Server: `http://localhost:8989` (they share gluetun's network)
    - API Key: (from Sonarr → Settings → General → Security)
-5. **Connect to Radarr:** Same process with `http://radarr:7878`
+5. **Connect to Radarr:** Same process with `http://localhost:7878`
 6. **Sync:** Settings → Apps → Sync App Indexers
 
 ### 5.3 Sonarr (TV Shows)
@@ -476,7 +476,7 @@ docker exec gluetun wget -qO- ifconfig.me
 1. **Access:** `http://HOST_IP:8989`
 2. **Add Root Folder:** Settings → Media Management → `/tv`
 3. **Add Download Client:** Settings → Download Clients → qBittorrent
-   - Host: `gluetun` or `192.168.100.3` (not localhost!)
+   - Host: `localhost` (Sonarr & qBittorrent share gluetun's network)
    - Port: `8085`
    - Category: `sonarr`
 
@@ -485,7 +485,7 @@ docker exec gluetun wget -qO- ifconfig.me
 1. **Access:** `http://HOST_IP:7878`
 2. **Add Root Folder:** Settings → Media Management → `/movies`
 3. **Add Download Client:** Settings → Download Clients → qBittorrent
-   - Host: `gluetun` or `192.168.100.3`
+   - Host: `localhost` (Radarr & qBittorrent share gluetun's network)
    - Port: `8085`
    - Category: `radarr`
 
