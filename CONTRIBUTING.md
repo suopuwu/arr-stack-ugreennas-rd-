@@ -26,6 +26,10 @@ arr-stack-ugreennas/
 ├── .env                            # Your configuration (gitignored)
 ├── docs/                           # Documentation
 │   ├── SETUP.md                    # Complete setup guide
+│   ├── REFERENCE.md                # Quick reference (IPs, ports, commands)
+│   ├── BACKUP.md                   # Backup & restore guide
+│   ├── UPDATING.md                 # How to update the stack
+│   ├── HOME-ASSISTANT.md           # Home Assistant integration
 │   └── LEGAL.md                    # Legal notice
 ├── .claude/
 │   ├── instructions.md             # AI assistant instructions

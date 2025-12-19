@@ -53,6 +53,7 @@ Ask Claude to help deploy the stack - it reads [`.claude/instructions.md`](.clau
 - **Request management** with Jellyseerr (or Overseerr for Plex)
 - **Remote access** via WireGuard VPN server
 - **Ad-blocking DNS** with Pi-hole
+- **Configurable paths** via `MEDIA_ROOT` env var (works on any NAS/server)
 
 **Operational**
 - **Backup script** for essential configs (~13MB) - auto-detects setup variant
