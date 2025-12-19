@@ -1,4 +1,4 @@
-# Media Automation Stack for Ugreen NAS
+# Media Automation Stack
 
 [![GitHub release](https://img.shields.io/github/v/release/Pharkie/arr-stack-ugreennas)](https://github.com/Pharkie/arr-stack-ugreennas/releases)
 
@@ -8,7 +8,7 @@ A complete, production-ready Docker Compose stack for automated media management
 >
 > <a href='https://ko-fi.com/X8X01NIXRB' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
-**Tested on Ugreen NAS DXP4800+** but should work on any Docker host (Synology, QNAP, Linux server, etc.).
+**Works on:** Ugreen NAS, Synology, QNAP, or any Docker host.
 
 ## Legal Notice
 
