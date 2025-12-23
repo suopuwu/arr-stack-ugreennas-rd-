@@ -2,13 +2,17 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/Pharkie/arr-stack-ugreennas)](https://github.com/Pharkie/arr-stack-ugreennas/releases)
 
-A complete, production-ready Docker Compose stack for automated media management with VPN routing, SSL certificates, and remote access.
+A Docker Compose stack for automated media management. Request a TV show or movie, and it downloads, organizes, and appears in Jellyfin ready to watch—all routed through a VPN.
+
+Sonarr (TV) and Radarr (movies) handle fetching. Prowlarr manages your indexers. qBittorrent and SABnzbd cover both torrents and Usenet. Bazarr fetches subtitles automatically. Jellyseerr gives family, housemates, or friends a way to browse and request titles.
+
+Gluetun routes downloads through your VPN provider. Traefik manages SSL certificates and local `.lan` domains (`http://sonarr.lan`, `http://jellyfin.lan`—no port numbers to remember). Pi-hole blocks ads, and health checks auto-restart crashed services. WireGuard lets you stream from anywhere—hotel, holiday, wherever—without geo-restrictions. Cloudflare Tunnel handles secure external access to Jellyfin without exposing your home IP.
+
+Developed and tested on Ugreen NAS (DXP4800+) but should work on Synology, QNAP, or any Docker host. Plex variant included; swap VPN providers via environment variables.
 
 > If this project helped you, consider giving it a ⭐
 >
 > <a href='https://ko-fi.com/X8X01NIXRB' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-
-**Works on:** Ugreen NAS, Synology, QNAP, or any Docker host. (Tested on Ugreen DXP4800+)
 
 ## Legal Notice
 
