@@ -280,6 +280,40 @@ fi
 
 This pattern is used in `scripts/lib/check-env-backup.sh` and `check-uptime-monitors.sh`.
 
+## Custom .lan Domains (User-Specific Services)
+
+To add `.lan` domains for services outside this stack (e.g., Frigate, Home Assistant):
+
+**1. Add DNS entry** (gitignored `pihole/02-local-dns.conf`):
+```
+address=/frigate.lan/TRAEFIK_LAN_IP
+```
+
+**2. Add Traefik route** (create `traefik/dynamic/my-services.local.yml` - gitignored):
+```yaml
+http:
+  routers:
+    frigate-lan:
+      rule: "Host(`frigate.lan`)"
+      entryPoints: [web]
+      service: frigate-lan
+
+  services:
+    frigate-lan:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.30:5000"
+```
+
+**3. Deploy**:
+```bash
+# On NAS - reload Pi-hole DNS
+docker exec pihole pihole restartdns
+# Traefik picks up *.local.yml automatically
+```
+
+**Requirement**: Service must be on `traefik-proxy` network with a static IP.
+
 ## .env Gotchas
 
 **Bcrypt hashes must be quoted** (they contain `$` which Docker interprets as variables):
