@@ -429,23 +429,9 @@ Your stack is running! Now configure each app to work together.
 
 ### How Services Connect to Each Other
 
-VPN-protected services (qBittorrent, Sonarr, Radarr, Prowlarr) share Gluetun's network. This affects how you configure connections:
+VPN-protected services (qBittorrent, Sonarr, Radarr, Prowlarr, SABnzbd) share Gluetun's network. They use `localhost` to reach each other. Services outside Gluetun (like Jellyseerr) use `gluetun` as the hostname.
 
-| When configuring... | To connect to... | Use this address |
-|---------------------|------------------|------------------|
-| Sonarr | qBittorrent | `localhost:8085` |
-| Radarr | qBittorrent | `localhost:8085` |
-| Prowlarr | Sonarr | `localhost:8989` |
-| Prowlarr | Radarr | `localhost:7878` |
-| Prowlarr | FlareSolverr | `172.20.0.10:8191` |
-| Jellyseerr | Sonarr | `gluetun:8989` |
-| Jellyseerr | Radarr | `gluetun:7878` |
-| Bazarr | Sonarr | `gluetun:8989` |
-| Bazarr | Radarr | `gluetun:7878` |
-
-**Why the difference?** Services inside Gluetun's network (same VPN tunnel) see each other as `localhost`. Services outside Gluetun must connect through the `gluetun` hostname.
-
-> **Reference:** See [Quick Reference](REFERENCE.md) for the full network diagram.
+See **[Quick Reference → Service Connection Guide](REFERENCE.md#service-connection-guide)** for the full address table.
 
 ### 4.1 qBittorrent
 
