@@ -868,7 +868,13 @@ wg:
 ```bash
 # Deploy Cloudflare Tunnel
 docker compose -f docker-compose.cloudflared.yml up -d
+
+# Optional: Improve tunnel stability (increases UDP buffer for QUIC)
+sudo sysctl -w net.core.rmem_max=7500000
+sudo sysctl -w net.core.wmem_max=7500000
 ```
+
+> **Note:** The sysctl settings are lost on reboot. To make permanent, add to `/etc/sysctl.conf` (if your NAS supports it).
 
 ### Test External Access
 

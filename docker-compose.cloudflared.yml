@@ -10,7 +10,12 @@
 # Requires: Cloudflare account (free), domain pointed to Cloudflare.
 #
 # No web UI - runs silently in background.
+#
+# NOTE: Uses separate project name so compose operations on other files
+# don't accidentally stop the tunnel (was causing Error 1033).
 # ═══════════════════════════════════════════════════════════════════════════════
+
+name: cloudflared
 
 services:
   cloudflared:
