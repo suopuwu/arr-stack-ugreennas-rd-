@@ -67,10 +67,10 @@ Prowlarr → Sonarr
 
 ## Network Layout
 
-All services run on the `traefik-proxy` network with static IPs:
+All services run on the `arr-stack` network with static IPs:
 
 ```
-traefik-proxy network (172.20.0.0/24)
+arr-stack network (172.20.0.0/24)
 ───────────────────────────────────────────────────────────────────────────────────
 │ IP           │ Service      │ Notes                          │ Required for     │
 ├──────────────┼──────────────┼────────────────────────────────┼──────────────────│

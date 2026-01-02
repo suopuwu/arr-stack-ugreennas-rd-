@@ -21,7 +21,7 @@ Copy this file to `config.local.md` and fill in your values.
 | Cloudflare Account | (your Cloudflare login) |
 | Tunnel Name | `your-tunnel-name` |
 
-## Network (traefik-proxy: 172.20.0.0/24)
+## Network (arr-stack: 172.20.0.0/24)
 
 | Service | IP Address |
 |---------|------------|

@@ -119,7 +119,7 @@ docker inspect sonarr --format '{{.HostConfig.NetworkMode}}'  # Should match
 
 Routes defined in `traefik/dynamic/vpn-services.yml`, NOT Docker labels.
 
-Docker labels are minimal (`traefik.enable=true`, `traefik.docker.network=traefik-proxy`). To add routes, edit `vpn-services.yml`.
+Docker labels are minimal (`traefik.enable=true`, `traefik.docker.network=arr-stack`). To add routes, edit `vpn-services.yml`.
 
 **Remote vs Local-only services:**
 - **Remote** (via Cloudflare Tunnel): Jellyfin, Jellyseerr, WireGuard, Traefik dashboard
@@ -192,7 +192,7 @@ docker exec pihole sed -n '129p' /etc/pihole/pihole.toml
 ## Architecture
 
 - **3 compose files**: traefik (infra), arr-stack (apps), cloudflared (tunnel)
-- **Network**: traefik-proxy (172.20.0.0/24), static IPs for all services
+- **Network**: arr-stack (172.20.0.0/24), static IPs for all services
 - **External access**: Cloudflare Tunnel (bypasses CGNAT)
 
 ## Adding Services
@@ -337,7 +337,7 @@ docker exec pihole pihole restartdns
 # Traefik picks up *.local.yml automatically
 ```
 
-**Requirement**: Service must be on `traefik-proxy` network with a static IP.
+**Requirement**: Service must be on `arr-stack` network with a static IP.
 
 ## .env Gotchas
 

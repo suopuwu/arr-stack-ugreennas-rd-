@@ -20,7 +20,7 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.2
       # macvlan gives Traefik its own LAN IP where it can use port 80/443
       # (NAS owns those ports on its IP, but Traefik owns them on TRAEFIK_LAN_IP)
@@ -40,7 +40,7 @@ services:
       - ./traefik/acme.json:/acme.json
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
 
       # Dashboard
       - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN}`)"
@@ -68,7 +68,7 @@ services:
       start_period: 40s
 
 networks:
-  traefik-proxy:
+  arr-stack:
     external: true
   # macvlan network gives Traefik its own IP on your physical LAN
   # This allows Traefik to own port 80/443 (which NAS can't give up)

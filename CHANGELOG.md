@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **Network subnet**: Changed from `192.168.100.0/24` to `172.20.0.0/24` to avoid conflicts with common LAN ranges
 - **Jellyfin discovery ports**: Added 7359/udp (client discovery) and 1900/udp (DLNA) for better app auto-detection
-- **duc.lan support**: duc now on traefik-proxy network (172.20.0.14) with .lan domain access
+- **duc.lan support**: duc now on arr-stack network (172.20.0.14) with .lan domain access
 
 ### Documentation
 - **Prerequisites consolidated**: Simplified to just Hardware and Software/Services lists

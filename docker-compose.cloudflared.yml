@@ -20,7 +20,7 @@ services:
     volumes:
       - ./cloudflared:/home/nonroot/.cloudflared:ro
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.12
     healthcheck:
       test: ["CMD", "cloudflared", "tunnel", "info"]
@@ -38,5 +38,5 @@ services:
         max-file: "3"
 
 networks:
-  traefik-proxy:
+  arr-stack:
     external: true

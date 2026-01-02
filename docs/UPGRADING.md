@@ -49,8 +49,8 @@ docker compose -f docker-compose.arr-stack.yml down && \
 docker compose -f docker-compose.utilities.yml down 2>/dev/null; \
 docker compose -f docker-compose.cloudflared.yml down 2>/dev/null; \
 docker compose -f docker-compose.traefik.yml down && \
-docker network rm traefik-proxy && \
-docker network create --driver=bridge --subnet=172.20.0.0/24 --gateway=172.20.0.1 traefik-proxy && \
+docker network rm arr-stack && \
+docker network create --driver=bridge --subnet=172.20.0.0/24 --gateway=172.20.0.1 arr-stack && \
 docker compose -f docker-compose.traefik.yml up -d && \
 docker compose -f docker-compose.arr-stack.yml up -d && \
 docker compose -f docker-compose.cloudflared.yml up -d 2>/dev/null; \
@@ -58,7 +58,7 @@ docker compose -f docker-compose.utilities.yml up -d 2>/dev/null; \
 echo "Migration complete"
 ```
 
-> **Other containers on traefik-proxy?** If you have containers from other compose files using this network (e.g., Frigate), stop them first, then update their compose files to use `172.20.0.x` IPs before restarting.
+> **Other containers on arr-stack?** If you have containers from other compose files using this network (e.g., Frigate), stop them first, then update their compose files to use `172.20.0.x` IPs before restarting.
 
 > **Why the change?** The new `172.20.0.0/24` subnet is a Docker-conventional range, less likely to conflict with home LANs (which often use `192.168.x.x`).
 

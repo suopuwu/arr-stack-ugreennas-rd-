@@ -126,7 +126,7 @@ docker compose -f docker-compose.arr-stack.yml up -d
 
 | Network | Subnet | Purpose |
 |---------|--------|---------|
-| traefik-proxy | 172.20.0.0/24 | Service communication |
+| arr-stack | 172.20.0.0/24 | Service communication |
 | vpn-net | 10.8.1.0/24 | Internal VPN routing (WireGuard peers) |
 | traefik-lan | (your LAN)/24 | macvlan - gives Traefik its own LAN IP for .lan domains |
 

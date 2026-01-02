@@ -34,7 +34,7 @@ networks:
     ipam:
       config:
         - subnet: 10.8.1.0/24
-  traefik-proxy:
+  arr-stack:
     external: true
 
 #########################
@@ -87,7 +87,7 @@ services:
       - "8085:8085"   # qBittorrent
       - "8082:8080"   # SABnzbd
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.3
       vpn-net:
     restart: always
@@ -263,12 +263,12 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}/movies:/media/movies:ro
       - ${MEDIA_ROOT:-/volume1/Media}/tv:/media/tv:ro
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.4
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
     restart: always
     logging: *default-logging
     healthcheck:
@@ -291,7 +291,7 @@ services:
       - "${NAS_IP:-0.0.0.0}:53:53/udp"
       - "8081:80"  # Web UI (local network access)
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.5
       vpn-net:
         ipv4_address: 10.8.1.200
@@ -306,7 +306,7 @@ services:
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
     cap_add:
       - NET_ADMIN
       - SYS_NICE
@@ -339,11 +339,11 @@ services:
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
     ports:
       - "51820:51820/udp"
     networks:
-        traefik-proxy:
+        arr-stack:
           ipv4_address: 172.20.0.6
         vpn-net:
           ipv4_address: 10.8.1.3
@@ -378,12 +378,12 @@ services:
       - TZ=${TZ:-Europe/London}
       - PORT=5055
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.8
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
     volumes:
       - jellyseerr-config:/app/config
     restart: always
@@ -411,7 +411,7 @@ services:
       - PGID=1000
       - TZ=${TZ:-Europe/London}
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.9
     volumes:
       - bazarr-config:/config
@@ -420,7 +420,7 @@ services:
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik-proxy"
+      - "traefik.docker.network=arr-stack"
     restart: always
     logging: *default-logging
     healthcheck:
@@ -440,7 +440,7 @@ services:
       - LOG_LEVEL=info
       - TZ=${TZ:-Europe/London}
     networks:
-      traefik-proxy:
+      arr-stack:
         ipv4_address: 172.20.0.10
     labels:
       - deunhealth.restart.on.unhealthy=true
