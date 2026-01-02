@@ -756,22 +756,7 @@ Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues
 
 ## External Access (Optional)
 
-> **This section is for "+ remote access" setup only.** Skip if you only need local access (Core or + local DNS).
-
-### What is Traefik?
-
-Traefik is a reverse proxy that enables **secure remote access** to your services from outside your home network.
-
-**Core setup doesn't need Traefik.** Access via IP:port (e.g., `192.168.1.50:8096`).
-
-**+ local DNS needs Traefik.** For `.lan` domains, Pi-hole points to Traefik which routes to services.
-
-**Remote access needs Traefik.** When accessing from outside your home:
-- Routes `jellyfin.yourdomain.com` to your Jellyfin server
-- Provides HTTPS certificates (the padlock in your browser)
-- Works with Cloudflare Tunnel to avoid port forwarding
-
----
+Access your services from anywhere: `jellyfin.yourdomain.com` instead of only on your home network.
 
 **Requirements:**
 - Domain name (~$8-10/year)
