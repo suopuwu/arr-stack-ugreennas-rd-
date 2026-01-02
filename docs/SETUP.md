@@ -13,7 +13,7 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 - [Step 4: Configure Each App](#step-4-configure-each-app)
 - [Step 5: Test](#step-5-test)
 - [Local DNS (.lan domains)](#local-dns-lan-domains---optional) ← + local DNS
-- [External Access](#external-access-optional) ← + remote access
+- [External Access](#external-access--optional) ← + remote access
 - [Backup](#backup)
 - [Optional Utilities](#optional-utilities)
 
@@ -743,7 +743,7 @@ See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `
 
 **What's next?**
 - **Stop here** if local access is all you need
-- **Continue to [External Access](#external-access-optional)** for remote access from anywhere
+- **Continue to [External Access](#external-access--optional)** for remote access from anywhere
 
 **Other docs:** [Upgrading](UPGRADING.md) · [Home Assistant Integration](HOME-ASSISTANT.md) · [Quick Reference](REFERENCE.md)
 
@@ -751,7 +751,7 @@ Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues
 
 ---
 
-## External Access (Optional)
+## External Access — Optional
 
 Access your services from anywhere: `jellyfin.yourdomain.com` instead of only on your home network.
 
