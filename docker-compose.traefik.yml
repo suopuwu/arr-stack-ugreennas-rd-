@@ -1,8 +1,22 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRAEFIK - Reverse proxy for external access (Anywhere setup only)
+#
+# What it does:
+# - Routes jellyfin.yourdomain.com → Jellyfin container
+# - Handles HTTPS certificates automatically
+# - Works with Cloudflare Tunnel for secure remote access
+#
+# You DON'T need this if you're only accessing services locally.
+# For local-only access, use IP:port or .lan domains via Pi-hole.
+#
+# Access: traefik.lan | traefik.yourdomain.com | NAS_IP:9090
+# ═══════════════════════════════════════════════════════════════════════════════
+
 services:
   traefik:
     image: traefik:v3.0
     container_name: traefik
-    restart: unless-stopped
+    restart: always
     security_opt:
       - no-new-privileges:true
     networks:

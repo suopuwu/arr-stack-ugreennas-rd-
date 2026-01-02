@@ -28,6 +28,24 @@ Works on Ugreen, Synology, QNAP, or any Docker host.
 
 </details>
 
+## How It Works
+
+**The flow:** Someone requests a show → it downloads automatically → appears in your media library.
+
+```
+Jellyseerr     →  Sonarr/Radarr  →  Prowlarr     →  qBittorrent  →  Jellyfin
+(request portal)  (monitors shows)   (finds sources)  (downloads)     (watch it)
+```
+
+**VPN protection:** Downloads go through your VPN (via Gluetun). Streaming doesn't need VPN—you're watching your own files.
+
+**Access options:**
+| Setup | How you access | What you need |
+|-------|----------------|---------------|
+| **Home Basic** | `192.168.1.50:8096` | Just the core stack |
+| **Home Pro** | `jellyfin.lan` | Add Pi-hole for DNS |
+| **Anywhere** | `jellyfin.yourdomain.com` | Add Traefik + Cloudflare Tunnel |
+
 ## Get Started
 
 **[Setup Guide →](docs/SETUP.md)**

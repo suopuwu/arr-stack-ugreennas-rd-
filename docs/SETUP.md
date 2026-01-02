@@ -5,13 +5,18 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Choose Your Setup](#choose-your-setup) ← Start here
 - [Stack Overview](#stack-overview)
 - [Step 1: Create Directories and Clone/Fork Repository](#step-1-create-directories-and-clonefork-repository)
 - [Step 2: Configure Settings](#step-2-configure-settings)
 - [Step 3: Start the Stack](#step-3-start-the-stack)
 - [Step 4: Configure Each App](#step-4-configure-each-app)
 - [Step 5: Test](#step-5-test)
-- [External Access (Optional)](#external-access-optional)
+- [✅ Home Basic Complete](#-home-basic-complete)
+- [Local DNS (.lan domains)](#local-dns-lan-domains---optional) ← Home Pro
+- [✅ Home Pro Complete](#-home-pro-complete)
+- [External Access (Optional)](#external-access-optional) ← Anywhere
+- [✅ Anywhere Complete](#-anywhere-complete)
 - [Backup](#backup)
 - [Optional Utilities](#optional-utilities)
 
@@ -19,6 +24,7 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 
 | Doc | Purpose |
 |-----|---------|
+| [Architecture](ARCHITECTURE.md) | How services connect, network layout |
 | [Quick Reference](REFERENCE.md) | URLs, commands, IPs |
 | [Upgrading](UPGRADING.md) | Pull updates, redeploy |
 | [Backup & Restore](BACKUP.md) | Backup configs, restore |
@@ -48,16 +54,65 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 
 ---
 
+## Choose Your Setup
+
+Before diving in, decide how you'll access your media stack:
+
+| Setup | How you access | What to configure | Good for |
+|-------|----------------|-------------------|----------|
+| **Home Basic** | `192.168.1.50:8096` | Just `.env` + VPN credentials | Testing, single user |
+| **Home Pro** | `jellyfin.lan` | Add Pi-hole for DNS | Home/family use |
+| **Anywhere** | `jellyfin.yourdomain.com` | Add Traefik + Cloudflare Tunnel | Remote access |
+
+**You can start simple and add features later.** The guide has checkpoints so you can stop at any level.
+
+### What Each Component Does
+
+| Component | What it does | Which setup? |
+|-----------|--------------|--------------|
+| **Gluetun** | VPN container - routes download traffic through VPN so your ISP can't see what you download | All |
+| **Jellyfin** | Media player - like Netflix but for your own content | All |
+| **Sonarr** | TV show monitor - watches for new episodes, sends to download | All |
+| **Radarr** | Movie monitor - watches for new movies, sends to download | All |
+| **Prowlarr** | Indexer manager - finds download sources for Sonarr/Radarr | All |
+| **qBittorrent** | Torrent client - downloads files (through VPN) | All |
+| **Jellyseerr** | Request portal - users request shows/movies here | All (recommended) |
+| **Pi-hole** | DNS server - enables `.lan` domains, blocks ads | Home Pro + Anywhere |
+| **Traefik** | Reverse proxy - routes `yourdomain.com` to services, handles HTTPS | Anywhere only |
+| **Cloudflared** | Tunnel to Cloudflare - secure remote access without port forwarding | Anywhere only |
+| **WireGuard** | VPN server - access your stack when away from home | Anywhere only (needs DOMAIN) |
+
+### What You'll Edit
+
+**All setups:**
+- `.env` - VPN credentials, NAS IP, media paths, PUID/PGID
+
+**Home Pro + Anywhere (if using Pi-hole):**
+- `pihole/02-local-dns.conf` - Your `.lan` domain mappings
+
+**Anywhere only (if using Traefik):**
+- `traefik/traefik.yml` - Replace `yourdomain.com` (3 places)
+- `traefik/dynamic/vpn-services.yml` - Replace `yourdomain.com`
+
+**Files you DON'T edit:**
+- `docker-compose.*.yml` - Work as-is, configured via `.env`
+- `traefik/dynamic/tls.yml` - Security defaults
+- `traefik/dynamic/local-services.yml` - Auto-generates from `.env`
+
+---
+
 ## Stack Overview
 
-The stack is split into four Docker Compose files so you can deploy only what you need. See [Quick Reference](REFERENCE.md) for .lan URLs and network details.
+The stack is split into Docker Compose files so you can deploy only what you need:
 
-| File | Purpose | Required? |
-|------|---------|-----------|
-| `docker-compose.traefik.yml` | Reverse proxy, SSL certificates, .lan domains | Yes |
-| `docker-compose.arr-stack.yml` | Media stack (Jellyfin, *arr apps, downloads) | Yes |
-| `docker-compose.cloudflared.yml` | Remote access via Cloudflare Tunnel | Optional |
-| `docker-compose.utilities.yml` | Monitoring, auto-recovery, disk usage | Optional |
+| File | Purpose | Which setup? |
+|------|---------|--------------|
+| `docker-compose.arr-stack.yml` | Core media stack (Jellyfin, *arr apps, downloads, VPN) | All |
+| `docker-compose.traefik.yml` | Reverse proxy for external access | Anywhere only |
+| `docker-compose.cloudflared.yml` | Secure tunnel to Cloudflare (no port forwarding) | Anywhere only |
+| `docker-compose.utilities.yml` | Monitoring, auto-recovery, disk usage | Optional extras |
+
+See [Quick Reference](REFERENCE.md) for .lan URLs and network details.
 
 > **Prefer Plex?** Use `docker-compose.plex-arr-stack.yml` instead of `arr-stack` (untested).
 
@@ -85,6 +140,8 @@ The stack is split into four Docker Compose files so you can deploy only what yo
 | **FlareSolverr** | CAPTCHA bypass | 8191 |
 
 > **Don't need all these?** Remove any service from the compose file. Core dependency: Gluetun.
+
+> **Why `restart: always`?** All services use `restart: always` instead of `unless-stopped`. This ensures Docker restarts containers with their correct static IPs after a reboot or OS upgrade. Some NAS platforms (UGOS, Synology DSM) may otherwise start containers via their GUI, which ignores compose network settings and can cause IP conflicts.
 
 ### `docker-compose.utilities.yml`
 
@@ -237,6 +294,14 @@ This path should contain (or will contain) your `downloads`, `tv`, and `movies` 
 
 ### 2.3 Configure VPN
 
+**Why VPN for downloads?** Your ISP can see what you download via BitTorrent. A VPN encrypts this traffic and routes it through another server, so your ISP only sees "encrypted traffic to VPN provider".
+
+**Why only downloads?** Streaming (Jellyfin) doesn't need VPN protection—you're watching your own files. Running everything through VPN would slow down streaming unnecessarily.
+
+**How it works:** qBittorrent, Sonarr, Radarr, and Prowlarr all run "inside" the Gluetun container's network. Their internet traffic goes through the VPN tunnel automatically.
+
+---
+
 Add your VPN credentials to `.env`. Gluetun supports 30+ providers—find yours below:
 
 <details>
@@ -297,7 +362,9 @@ openssl rand -base64 24
 ```
 Add to `.env`: `PIHOLE_UI_PASS=your_password`
 
-**WireGuard Password Hash** (for remote VPN access):
+**WireGuard Password Hash** (for remote VPN access — Anywhere setup only):
+
+> **Note:** WireGuard uses `wg.${DOMAIN}` as its hostname. You need the Anywhere setup (with DOMAIN configured) for WireGuard to work.
 
 Invent a password for the WireGuard admin UI and note it down, then generate its hash:
 ```bash
@@ -370,9 +437,27 @@ docker exec gluetun wget -qO- ifconfig.me
 
 ## Step 4: Configure Each App
 
-Your stack is running! Now configure each app to work together. They're roughly ordered by dependency.
+Your stack is running! Now configure each app to work together.
 
-> **VPN Network Sharing:** Sonarr, Radarr, Prowlarr, and qBittorrent share Gluetun's network (for VPN protection). They reach each other via `localhost`. Services outside gluetun (Jellyseerr, Bazarr) reach them via `gluetun` hostname or `172.20.0.3`. See [Quick Reference](REFERENCE.md) for details.
+### How Services Connect to Each Other
+
+VPN-protected services (qBittorrent, Sonarr, Radarr, Prowlarr) share Gluetun's network. This affects how you configure connections:
+
+| When configuring... | To connect to... | Use this address |
+|---------------------|------------------|------------------|
+| Sonarr | qBittorrent | `localhost:8085` |
+| Radarr | qBittorrent | `localhost:8085` |
+| Prowlarr | Sonarr | `localhost:8989` |
+| Prowlarr | Radarr | `localhost:7878` |
+| Prowlarr | FlareSolverr | `172.20.0.10:8191` |
+| Jellyseerr | Sonarr | `gluetun:8989` |
+| Jellyseerr | Radarr | `gluetun:7878` |
+| Bazarr | Sonarr | `gluetun:8989` |
+| Bazarr | Radarr | `gluetun:7878` |
+
+**Why the difference?** Services inside Gluetun's network (same VPN tunnel) see each other as `localhost`. Services outside Gluetun must connect through the `gluetun` hostname.
+
+> **Reference:** See [Quick Reference](REFERENCE.md) for the full network diagram.
 
 ### 4.1 qBittorrent
 
@@ -574,7 +659,41 @@ Automatically downloads subtitles for your media.
 
 **Optional: Network-wide DNS.** Set your router's DHCP DNS to your NAS IP.
 
-### 4.11 Local DNS (.lan domains) — Optional
+---
+
+## Step 5: Test
+
+### VPN Test
+
+Run on NAS via SSH:
+```bash
+docker exec gluetun wget -qO- ifconfig.me       # Should show VPN IP, not your home IP
+docker exec qbittorrent wget -qO- ifconfig.me   # Same - confirms qBit uses VPN
+```
+
+### Service Integration Test
+1. Sonarr/Radarr: Settings → Download Clients → Test
+2. Add a TV show or movie (noting legal restrictions) → verify it appears in qBittorrent
+3. After download completes → verify it moves to library
+4. Jellyfin → verify media appears in library
+
+---
+
+## ✅ Home Basic Complete!
+
+**Congratulations!** Your media stack is working. You can now:
+- Access services via `NAS_IP:port` (e.g., `192.168.1.50:8096` for Jellyfin)
+- Add content via Sonarr (TV) and Radarr (movies)
+- Request content via Jellyseerr
+
+**What's next?**
+- **Stop here** if IP:port access is fine for you
+- **Continue to [Local DNS](#local-dns-lan-domains)** for `.lan` domains (Home Pro)
+- **Skip to [External Access](#external-access-optional)** for remote access (Anywhere)
+
+---
+
+## Local DNS (.lan domains) — Optional
 
 Access services without remembering port numbers: `http://sonarr.lan` instead of `http://10.10.0.10:8989`.
 
@@ -639,39 +758,41 @@ See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `
 
 ---
 
-## Step 5: Test
+## ✅ Home Pro Complete!
 
-### VPN Test
+**Congratulations!** You now have:
+- Pretty `.lan` URLs for all services
+- Ad-blocking via Pi-hole
+- No ports to remember
 
-Run on NAS via SSH:
-```bash
-docker exec gluetun wget -qO- ifconfig.me       # Should show VPN IP, not your home IP
-docker exec qbittorrent wget -qO- ifconfig.me   # Same - confirms qBit uses VPN
-```
+**What's next?**
+- **Stop here** if local access is all you need
+- **Continue to [External Access](#external-access-optional)** for remote access from anywhere
 
-### Service Integration Test
-1. Sonarr/Radarr: Settings → Download Clients → Test
-2. Add a TV show or movie (noting legal restrictions) → verify it appears in qBittorrent
-3. After download completes → verify it moves to library
-4. Jellyfin → verify media appears in library
-
----
-
-## Setup Done!
-
-Now:
-
-1. **Add content:** Search for TV shows in Sonarr, movies in Radarr
-2. **Deploy utilities** (optional): See below
-3. **Bookmark:** [Quick Reference](REFERENCE.md) for URLs, commands, and network info
-
-**Other docs:** [Upgrading](UPGRADING.md) · [Home Assistant Integration](HOME-ASSISTANT.md)
+**Other docs:** [Upgrading](UPGRADING.md) · [Home Assistant Integration](HOME-ASSISTANT.md) · [Quick Reference](REFERENCE.md)
 
 Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues).
 
 ---
 
 ## External Access (Optional)
+
+> **This section is for "Anywhere" setup only.** Skip if you only need local access (Home Basic or Home Pro).
+
+### What is Traefik?
+
+Traefik is a reverse proxy that enables **secure remote access** to your services from outside your home network.
+
+**Local access doesn't need Traefik.** On your home network, you can use:
+- Direct IP:port (e.g., `192.168.1.50:8096`) — Home Basic
+- `.lan` domains via Pi-hole (e.g., `jellyfin.lan`) — Home Pro
+
+**Remote access needs Traefik.** When accessing from outside your home:
+- Routes `jellyfin.yourdomain.com` to your Jellyfin server
+- Provides HTTPS certificates (the padlock in your browser)
+- Works with Cloudflare Tunnel to avoid port forwarding
+
+---
 
 **Requirements:**
 - Domain name (~$8-10/year)
@@ -777,6 +898,17 @@ docker compose -f docker-compose.cloudflared.yml up -d
 From your phone on cellular data (not WiFi):
 - Visit `https://jellyfin.yourdomain.com`
 - Check SSL certificate is valid (padlock icon)
+
+---
+
+## ✅ Anywhere Complete!
+
+**Congratulations!** You now have:
+- Remote access from anywhere via `yourdomain.com`
+- HTTPS encryption for all external traffic
+- No ports exposed on your router (via Cloudflare Tunnel)
+
+**You're done!** The sections below (Backup, Utilities) are optional but recommended.
 
 ---
 

@@ -12,6 +12,14 @@
 ##############################################################################
 
 
+#####################################################################
+# ⚠️  NEVER use 'docker compose down' - kills Pi-hole DNS!        #
+# ⚠️  You WILL lose internet before you can run 'up -d'           #
+#                                                                   #
+# ✅ Safe restart: docker compose -f docker-compose.plex-arr-stack.yml up -d --force-recreate
+# ✅ Or use:       ./scripts/restart-stack.sh                      #
+#####################################################################
+
 #########################
 # Centralized Volumes   #
 #########################
@@ -54,9 +62,10 @@ x-logging: &default-logging
 # Services              #
 #########################
 services:
-  #############################################
-  # VPN Gateway (Gluetun with Surfshark)    #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # GLUETUN - VPN gateway. Routes download traffic through your VPN provider.
+  # All services below marked "via VPN" share this network for privacy.
+  # ═══════════════════════════════════════════════════════════════════════════
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
@@ -93,7 +102,7 @@ services:
       traefik-proxy:
         ipv4_address: 172.20.0.3
       vpn-net:
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
@@ -101,9 +110,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Download Client (qBittorrent via VPN)    #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QBITTORRENT - Torrent download client. Downloads files through VPN.
+  # Access: qbit.lan | qbit.yourdomain.com | NAS_IP:8085
+  # ═══════════════════════════════════════════════════════════════════════════
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent
     container_name: qbittorrent
@@ -123,7 +133,7 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}:/media
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8085/"]
@@ -131,9 +141,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Usenet Download Client (SABnzbd via VPN) #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SABNZBD - Usenet download client. Downloads via VPN for extra security.
+  # Access: sabnzbd.lan | sabnzbd.yourdomain.com | NAS_IP:8082
+  # ═══════════════════════════════════════════════════════════════════════════
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
@@ -151,7 +162,7 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}/downloads/incomplete:/incomplete-downloads
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
@@ -159,9 +170,10 @@ services:
       timeout: 10s
       retries: 2
 
-  #############################################
-  # TV Show Management (Sonarr via VPN)      #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SONARR - TV show monitor. Watches for new episodes and sends to download.
+  # Access: sonarr.lan | sonarr.yourdomain.com | NAS_IP:8989
+  # ═══════════════════════════════════════════════════════════════════════════
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -179,7 +191,7 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}/downloads:/downloads
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8989/"]
@@ -187,9 +199,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Indexer Manager (Prowlarr via VPN)       #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PROWLARR - Indexer manager. Finds download sources for Sonarr/Radarr.
+  # Access: prowlarr.lan | prowlarr.yourdomain.com | NAS_IP:9696
+  # ═══════════════════════════════════════════════════════════════════════════
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -205,7 +218,7 @@ services:
       - prowlarr-config:/config
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9696/"]
@@ -213,9 +226,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Movie Management (Radarr via VPN)        #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # RADARR - Movie monitor. Watches for new movies and sends to download.
+  # Access: radarr.lan | radarr.yourdomain.com | NAS_IP:7878
+  # ═══════════════════════════════════════════════════════════════════════════
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -233,7 +247,7 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}/downloads:/downloads
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7878/"]
@@ -241,9 +255,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Media Server (Plex)                      #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PLEX - Media server. Stream your movies and TV shows.
+  # Access: plex.lan | plex.yourdomain.com | NAS_IP:32400
+  # ═══════════════════════════════════════════════════════════════════════════
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
@@ -265,7 +280,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-proxy"
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:32400/identity"]
@@ -274,9 +289,11 @@ services:
       retries: 2
       start_period: 30s
 
-  #############################################
-  # DNS & Ad-blocking (Pi-hole)              #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PI-HOLE - DNS server. Enables .lan domains and blocks ads network-wide.
+  # Access: pihole.lan/admin | NAS_IP:8081/admin
+  # For: Home Pro + Anywhere setups
+  # ═══════════════════════════════════════════════════════════════════════════
   pihole:
     image: pihole/pihole:latest
     container_name: pihole
@@ -304,7 +321,7 @@ services:
       - NET_ADMIN
       - SYS_NICE
       - SYS_TIME
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "dig", "@127.0.0.1", "-p", "53", "google.com", "+short"]
@@ -313,9 +330,10 @@ services:
       retries: 2
       start_period: 30s
 
-  #############################################
-  # WireGuard VPN Server (wg-easy)           #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WIREGUARD - VPN server for remote access to your home network.
+  # Access: wg.lan | wg.yourdomain.com | NAS_IP:51820/udp
+  # ═══════════════════════════════════════════════════════════════════════════
   wg-easy:
     image: ghcr.io/wg-easy/wg-easy
     container_name: wg-easy
@@ -344,7 +362,7 @@ services:
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "wg", "show"]
@@ -352,9 +370,10 @@ services:
       timeout: 10s
       retries: 1
 
-  #############################################
-  # Request Manager (Overseerr for Plex)     #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERSEERR - Request portal for Plex. Users request movies/shows here.
+  # Access: overseerr.lan | overseerr.yourdomain.com | NAS_IP:5055
+  # ═══════════════════════════════════════════════════════════════════════════
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
@@ -375,7 +394,7 @@ services:
       - "traefik.docker.network=traefik-proxy"
     volumes:
       - overseerr-config:/config
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:5055/api/v1/status"]
@@ -383,9 +402,10 @@ services:
       timeout: 10s
       retries: 3
 
-  #############################################
-  # Subtitle Management (Bazarr)             #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BAZARR - Subtitle manager. Automatically downloads subtitles.
+  # Access: bazarr.lan | bazarr.yourdomain.com | NAS_IP:6767
+  # ═══════════════════════════════════════════════════════════════════════════
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
@@ -408,7 +428,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-proxy"
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6767/"]
@@ -416,9 +436,10 @@ services:
       timeout: 10s
       retries: 2
 
-  #############################################
-  # Cloudflare Bypass (FlareSolverr)         #
-  #############################################
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FLARESOLVERR - Cloudflare bypass. Helps Prowlarr access protected sites.
+  # No web UI. Used internally by Prowlarr at 172.20.0.10:8191
+  # ═══════════════════════════════════════════════════════════════════════════
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -430,7 +451,7 @@ services:
         ipv4_address: 172.20.0.10
     labels:
       - deunhealth.restart.on.unhealthy=true
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       # Actually test Chrome by making a solve request (catches Chrome crashes)

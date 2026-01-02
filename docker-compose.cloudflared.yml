@@ -1,3 +1,17 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLOUDFLARE TUNNEL - Secure remote access without port forwarding (Anywhere setup)
+#
+# What it does:
+# - Creates an encrypted tunnel from your NAS to Cloudflare's network
+# - Routes jellyfin.yourdomain.com → your Jellyfin through the tunnel
+# - No ports exposed on your router = more secure
+#
+# You DON'T need this if you're only accessing services locally.
+# Requires: Cloudflare account (free), domain pointed to Cloudflare.
+#
+# No web UI - runs silently in background.
+# ═══════════════════════════════════════════════════════════════════════════════
+
 services:
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -16,7 +30,7 @@ services:
       start_period: 10s
     labels:
       - "deunhealth.restart.on.unhealthy=true"
-    restart: unless-stopped
+    restart: always
     logging:
       driver: "json-file"
       options:

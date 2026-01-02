@@ -1,5 +1,15 @@
 # Quick Reference: URLs, Commands, Network
 
+> ⚠️ **If you lose internet connection:** Pi-hole provides DNS for your LAN. If it goes down (e.g., during `docker compose down`), you'll lose DNS resolution and internet access. To recover:
+> 1. Connect to mobile hotspot (or manually set DNS to 8.8.8.8)
+> 2. SSH to NAS and run: `docker compose -f docker-compose.arr-stack.yml up -d pihole`
+> 3. Switch back to your normal network
+>
+> **Tip:** When doing full stack restarts, use mobile hotspot first, or restart with a single command:
+> ```bash
+> docker compose -f docker-compose.arr-stack.yml up -d  # Recreates without full down
+> ```
+
 ## Local Access (.lan domains)
 
 Port-free access from any device on your LAN:

@@ -32,11 +32,11 @@ x-logging: &default-logging
 # Services              #
 #########################
 services:
-  #############################################
-  # VPN Health Monitor (deunhealth)          #
-  #############################################
-  # Monitors gluetun and restarts dependent containers when VPN recovers.
-  # Works across compose files via Docker socket.
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DEUNHEALTH - Auto-recovery for VPN failures. Watches gluetun health and
+  # restarts dependent services (qBittorrent, Sonarr, etc.) when VPN recovers.
+  # No web UI. Runs silently in background.
+  # ═══════════════════════════════════════════════════════════════════════════
   deunhealth:
     image: qmcgaw/deunhealth
     container_name: deunhealth
@@ -44,7 +44,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=${TZ:-Europe/London}
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     healthcheck:
       test: ["CMD", "/app", "healthcheck"]
@@ -53,15 +53,14 @@ services:
       retries: 3
       start_period: 10s
 
-  #############################################
-  # Monitoring (Uptime Kuma)                 #
-  #############################################
-  # Local-only access: http://NAS_IP:3001
-  # Remote access: Connect via WireGuard VPN first
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UPTIME KUMA - Monitoring dashboard. Shows health of all your services.
+  # Access: uptime.lan | NAS_IP:3001 (LAN-only, use WireGuard for remote)
+  # ═══════════════════════════════════════════════════════════════════════════
   uptime-kuma:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
-    restart: unless-stopped
+    restart: always
     ports:
       - "3001:3001"  # Local network access only
     environment:
@@ -80,15 +79,11 @@ services:
       retries: 3
       start_period: 30s
 
-  #############################################
-  # Disk Usage Analyzer (duc)                #
-  #############################################
-  # Visual disk usage analyzer with treemap UI (like DaisyDisk).
-  # Re-indexes daily at 4am. Manual re-index: docker restart duc
-  #
-  # SECURITY: No authentication - local-only access
-  # Local access: http://duc.lan or http://NAS_IP:8838
-  # Remote access: Connect via WireGuard VPN first
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DUC - Disk usage analyzer. Visual treemap UI showing what's using storage.
+  # Access: duc.lan | NAS_IP:8838 (LAN-only, use WireGuard for remote)
+  # Note: Re-indexes daily at 4am. Manual: docker restart duc
+  # ═══════════════════════════════════════════════════════════════════════════
   duc:
     image: mkoestler/duc-service:latest
     container_name: duc
@@ -103,14 +98,13 @@ services:
     environment:
       - TZ=${TZ:-Europe/London}
       - SCHEDULE=0 4 * * *             # Re-index daily at 4am
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
 
-  #############################################
-  # qBittorrent Scheduler                     #
-  #############################################
-  # Pauses all torrents at 20:00, resumes at 06:00
-  # Allows NAS disks to spin down overnight
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QBIT-SCHEDULER - Pauses torrents overnight (20:00-06:00) to let disks
+  # spin down and reduce power/noise. No web UI.
+  # ═══════════════════════════════════════════════════════════════════════════
   qbit-scheduler:
     build: ./scripts/qbit-scheduler
     container_name: qbit-scheduler
@@ -120,5 +114,5 @@ services:
       - QBIT_PORT=8085
       - QBIT_USER=${QBIT_USER:-admin}
       - QBIT_PASS=${QBIT_PASSWORD}
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
