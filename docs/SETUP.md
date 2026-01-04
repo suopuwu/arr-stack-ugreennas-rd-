@@ -375,14 +375,19 @@ Copy the output to `.env`: `TRAEFIK_DASHBOARD_AUTH=admin:$$apr1$$...`
 
 ### 3.1 Create Docker Network
 
-> **Retrying after a failed deployment?** Clean up orphaned networks first:
-> ```bash
-> # Check for orphaned networks
-> ./scripts/check-network.sh
->
-> # Or clean all unused networks
-> docker network prune
-> ```
+<details>
+<summary><strong>Retrying after a failed deployment?</strong></summary>
+
+Clean up orphaned networks first:
+```bash
+# Check for orphaned networks
+./scripts/check-network.sh
+
+# Or clean all unused networks
+docker network prune
+```
+
+</details>
 
 ```bash
 docker network create \
