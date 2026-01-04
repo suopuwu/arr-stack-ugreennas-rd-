@@ -9,7 +9,7 @@ When someone requests a movie or TV show, here's what happens:
 ```
 ┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────────┐     ┌──────────┐
 │ Jellyseerr  │────▶│ Sonarr/Radarr│────▶│ Prowlarr  │────▶│ qBittorrent │────▶│ Jellyfin │
-│ (request)   │     │ (monitor)    │     │ (search)  │     │ (download)  │     │ (watch)  │
+│ (request)   │     │ (manage)     │     │ (indexers)│     │ (download)  │     │ (watch)  │
 └─────────────┘     └──────────────┘     └───────────┘     └─────────────┘     └──────────┘
       │                    │                   │                  │                  │
       │                    │                   │                  │                  │
@@ -17,11 +17,11 @@ When someone requests a movie or TV show, here's what happens:
                            Through VPN (Gluetun)                              Not through VPN
 ```
 
-1. **Jellyseerr** - User requests a TV show
-2. **Sonarr** - Receives request, monitors for releases
-3. **Prowlarr** - Searches indexers for downloads
-4. **qBittorrent/SABnzbd** - Downloads via torrents or Usenet (through VPN)
-5. **Jellyfin** - Makes files available to stream
+1. **Jellyseerr** - User requests a show or movie
+2. **Sonarr/Radarr** - Searches for releases, sends download links to qBittorrent/SABnzbd
+3. **Prowlarr** - Provides indexers to Sonarr/Radarr
+4. **qBittorrent/SABnzbd** - Downloads files via torrents or Usenet (through VPN)
+5. **Jellyfin** - Streams the completed files
 
 ## VPN Protection
 

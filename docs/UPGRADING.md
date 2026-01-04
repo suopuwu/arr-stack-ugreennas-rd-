@@ -28,6 +28,8 @@ docker compose -f docker-compose.arr-stack.yml pull
 docker compose -f docker-compose.arr-stack.yml up -d  # Restarts containers with new images - no further steps needed
 ```
 
+> **Ugreen NAS users:** UGOS has a built-in Container Manager that automatically updates images on a schedule. Check **Docker → Settings → Auto Update** to configure. You can skip manual image updates if this is enabled.
+
 > **Note:** Docker named volumes persist across restarts. All your service configurations (Sonarr settings, API keys, library data, etc.) are preserved.
 
 ---
@@ -119,7 +121,7 @@ echo "Migration complete"
 
 | Feature | What it does | Setup |
 |---------|--------------|-------|
-| `.lan` domains | `http://sonarr.lan` etc, no ports | Router DHCP reservation + Pi-hole DNS, see [SETUP.md](SETUP.md#511-local-dns-lan-domains--optional) |
+| `.lan` domains | `http://sonarr.lan` etc, no ports | Router DHCP reservation + Pi-hole DNS, see [SETUP.md](SETUP.md#local-dns-lan-domains---optional) |
 | `MEDIA_ROOT` env var | Configurable media path | Add to `.env` if not using `/volume1/Media` |
 | deunhealth | Auto-restart crashed services | Deploy `docker-compose.utilities.yml` |
 

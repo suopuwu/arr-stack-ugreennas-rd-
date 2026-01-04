@@ -12,8 +12,8 @@ Everything you need to go from zero to streaming. Works on any NAS or Docker hos
 - [Step 3: Start the Stack](#step-3-start-the-stack)
 - [Step 4: Configure Each App](#step-4-configure-each-app)
 - [Step 5: Check It Works](#step-5-check-it-works)
-- [Local DNS (.lan domains)](#local-dns-lan-domains---optional) ← + local DNS
-- [External Access](#external-access--optional) ← + remote access
+- [Local DNS (.lan domains)](#local-dns-lan-domains---optional)
+- [External Access](#external-access--optional)
 - [Backup](#backup)
 - [Optional Utilities](#optional-utilities)
 
@@ -32,11 +32,13 @@ Everything you need to go from zero to streaming. Works on any NAS or Docker hos
 
 ## Requirements
 
+Here's what you'll need to get started.
+
 ### Hardware
 - Docker host (NAS, server, Raspberry Pi 4+, etc.)
 - Minimum 4GB RAM (8GB+ recommended)
 - Storage for media files
-- Support for `/dev/net/tun` (for VPN)
+- VPN support (most NAS and Linux systems have this built-in)
 
 ### Software & Services
 - Docker Engine 20.10+
@@ -72,8 +74,8 @@ Before diving in, decide how you'll access your media stack:
 |-----------|--------------|--------------|
 | **Jellyseerr** | Request portal - users request shows/movies here | Core |
 | **Jellyfin** | Media player - like Netflix but for your own content | Core |
-| **Sonarr** | TV show monitor - watches for new episodes, sends to download | Core |
-| **Radarr** | Movie monitor - watches for new movies, sends to download | Core |
+| **Sonarr** | TV show manager - searches for episodes, sends to download client | Core |
+| **Radarr** | Movie manager - searches for movies, sends to download client | Core |
 | **Prowlarr** | Indexer manager - finds download sources for Sonarr/Radarr | Core |
 | **qBittorrent** | Torrent client - downloads files (through VPN) | Core |
 | **Gluetun** | VPN container - routes download traffic through VPN so your ISP can't see what you download | Core |
@@ -436,7 +438,7 @@ See **[Quick Reference → Service Connection Guide](REFERENCE.md#service-connec
 
 Streams your media library to any device.
 
-1. **Access:** `http://HOST_IP:8096`
+1. **Access:** `http://NAS_IP:8096`
 2. **Initial Setup:** Create admin account
 3. **Add Libraries:**
    - Movies: Content type "Movies", Folder `/media/movies`
@@ -446,7 +448,7 @@ Streams your media library to any device.
 
 Receives download requests from Sonarr and Radarr and downloads files via torrents.
 
-1. **Access:** `http://HOST_IP:8085`
+1. **Access:** `http://NAS_IP:8085`
 2. **Get temporary password** (qBittorrent 4.6.1+ generates a random password):
    ```bash
    # Run this on your NAS via SSH:
@@ -479,7 +481,7 @@ SABnzbd provides Usenet downloads as an alternative/complement to qBittorrent.
 
 > **Note:** Usenet is routed through VPN for consistency and an extra layer of security.
 
-1. **Access:** `http://HOST_IP:8082`
+1. **Access:** `http://NAS_IP:8082`
 2. **Run Quick-Start Wizard** with your Usenet provider details:
 
    **Popular providers:**
@@ -516,7 +518,7 @@ SABnzbd provides Usenet downloads as an alternative/complement to qBittorrent.
 
 Searches for TV shows, sends download links to qBittorrent/SABnzbd, and organizes completed files.
 
-1. **Access:** `http://HOST_IP:8989`
+1. **Access:** `http://NAS_IP:8989`
 2. **Add Root Folder:** Settings → Media Management → `/tv`
 3. **Add Download Client(s):** Settings → Download Clients
 
@@ -542,7 +544,7 @@ Searches for TV shows, sends download links to qBittorrent/SABnzbd, and organize
 
 Searches for movies, sends download links to qBittorrent/SABnzbd, and organizes completed files.
 
-1. **Access:** `http://HOST_IP:7878`
+1. **Access:** `http://NAS_IP:7878`
 2. **Add Root Folder:** Settings → Media Management → `/movies`
 3. **Add Download Client(s):** Settings → Download Clients
 
@@ -568,7 +570,7 @@ Searches for movies, sends download links to qBittorrent/SABnzbd, and organizes 
 
 Manages torrent/Usenet indexers and syncs them to Sonarr/Radarr.
 
-1. **Access:** `http://HOST_IP:9696`
+1. **Access:** `http://NAS_IP:9696`
 2. **Add Torrent Indexers:** Indexers (left sidebar) → + button → search by name
 3. **If using SABnzbd: Add Usenet Indexer**
    - **Indexers** (left sidebar, NOT Settings → Indexer Proxies) → + button
@@ -596,7 +598,7 @@ Manages torrent/Usenet indexers and syncs them to Sonarr/Radarr.
 
 Lets users browse and request movies/TV shows.
 
-1. **Access:** `http://HOST_IP:5055`
+1. **Access:** `http://NAS_IP:5055`
 2. **Sign in with Jellyfin:**
    - Jellyfin URL: `http://jellyfin:8096`
    - Enter Jellyfin credentials
@@ -604,17 +606,17 @@ Lets users browse and request movies/TV shows.
    - Settings → Services → Add Radarr:
      - **Hostname:** `gluetun` (internal Docker hostname)
      - **Port:** `7878`
-     - **External URL:** `http://radarr.lan` (or `http://HOST_IP:7878`) — makes "Open in Radarr" links work in your browser
+     - **External URL:** `http://radarr.lan` (or `http://NAS_IP:7878`) — makes "Open in Radarr" links work in your browser
    - Settings → Services → Add Sonarr:
      - **Hostname:** `gluetun`
      - **Port:** `8989`
-     - **External URL:** `http://sonarr.lan` (or `http://HOST_IP:8989`)
+     - **External URL:** `http://sonarr.lan` (or `http://NAS_IP:8989`)
 
 ### 4.8 Bazarr (Subtitles)
 
 Automatically downloads subtitles for your media.
 
-1. **Access:** `http://HOST_IP:6767`
+1. **Access:** `http://NAS_IP:6767`
 2. **Enable Authentication:** Settings → General → Security → Forms
 3. **Connect to Sonarr:** Settings → Sonarr → `http://gluetun:8989` (Sonarr runs via gluetun)
 4. **Connect to Radarr:** Settings → Radarr → `http://gluetun:7878` (Radarr runs via gluetun)
@@ -642,7 +644,7 @@ This gives Usenet a 30-minute head start before considering torrents.
 
 **Setup:**
 
-1. **Access:** `http://HOST_IP:8081/admin`
+1. **Access:** `http://NAS_IP:8081/admin`
 2. **Login:** Use password from `PIHOLE_UI_PASS` (password only, no username)
 3. **Upstream DNS:** Settings → DNS → pick upstream servers (1.1.1.1, 8.8.8.8, etc.). Pi-hole forwards queries there. Note: your upstream provider sees all non-blocked queries.
 
@@ -687,7 +689,7 @@ docker exec qbittorrent wget -qO- ifconfig.me   # Same - confirms qBit uses VPN
 
 Access services without remembering port numbers: `http://sonarr.lan` instead of `http://NAS_IP:8989`.
 
-This works by giving Traefik its own IP on your LAN via macvlan (a Docker network type that assigns a real LAN IP to a container). DNS resolves `.lan` domains to that IP.
+This works by giving Traefik its own IP address on your home network. When you type `sonarr.lan`, Pi-hole's DNS points it to Traefik, which routes you to the right service.
 
 **Step 1: Configure macvlan settings in .env**
 
@@ -710,7 +712,11 @@ The container uses a static IP with a fake MAC address (`TRAEFIK_LAN_MAC` in `.e
 - **MikroTik:** `/ip dhcp-server lease add address=10.10.0.11 mac-address=02:42:0a:0a:00:0b comment="Traefik macvlan" server=dhcp1`
 - **UniFi:** Settings → Networks → DHCP → Static IP → Add `02:42:0a:0a:00:0b` → your `TRAEFIK_LAN_IP`
 - **pfSense/OPNsense:** Services → DHCP → Static Mappings → Add
-- **Consumer routers:** Look for "DHCP Reservation" or "Address Reservation"
+- **TP-Link:** Advanced → Network → DHCP Server → Address Reservation → Add
+- **Netgear:** Advanced → Setup → LAN Setup → Address Reservation → Add
+- **ASUS:** LAN → DHCP Server → Manual Assignment → Add
+- **Linksys:** Connectivity → Local Network → DHCP Reservations
+- **Other routers:** Look for "DHCP Reservation" or "Address Reservation"
 
 </details>
 
@@ -721,7 +727,7 @@ The container uses a static IP with a fake MAC address (`TRAEFIK_LAN_MAC` in `.e
 ```bash
 cd /volume1/docker/arr-stack
 
-# Create Traefik config from example (required)
+# Create Traefik config from example
 cp traefik/traefik.yml.example traefik/traefik.yml
 
 # Deploy Traefik
@@ -730,13 +736,13 @@ docker compose -f docker-compose.traefik.yml up -d
 
 **Step 4: Configure DNS**
 ```bash
-# Create DNS config pointing to Traefik's IP
+# Copy example and replace placeholder with your Traefik IP
 sed "s/TRAEFIK_LAN_IP/10.10.0.11/g" pihole/02-local-dns.conf.example > pihole/02-local-dns.conf
 
-# Enable dnsmasq.d configs in Pi-hole v6 (one-time)
+# Tell Pi-hole to load custom DNS configs from dnsmasq.d folder (one-time)
 docker exec pihole sed -i 's/etc_dnsmasq_d = false/etc_dnsmasq_d = true/' /etc/pihole/pihole.toml
 
-# Restart Pi-hole to load new config
+# Restart Pi-hole to apply changes
 docker compose -f docker-compose.arr-stack.yml restart pihole
 ```
 
@@ -763,7 +769,7 @@ See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `
 
 **Other docs:** [Upgrading](UPGRADING.md) · [Home Assistant Integration](HOME-ASSISTANT.md) · [Quick Reference](REFERENCE.md)
 
-Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues).
+Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).
 
 ---
 
@@ -874,7 +880,20 @@ sudo sysctl -w net.core.rmem_max=7500000
 sudo sysctl -w net.core.wmem_max=7500000
 ```
 
-> **Note:** The sysctl settings are lost on reboot. To make permanent, add to `/etc/sysctl.conf` (if your NAS supports it).
+<details>
+<summary><strong>Make sysctl settings permanent (optional)</strong></summary>
+
+The `sysctl -w` commands above are lost on reboot. To persist them:
+
+```bash
+# Add these lines to /etc/sysctl.conf
+echo "net.core.rmem_max=7500000" | sudo tee -a /etc/sysctl.conf
+echo "net.core.wmem_max=7500000" | sudo tee -a /etc/sysctl.conf
+```
+
+Some NAS systems (like Ugreen) may reset `/etc/sysctl.conf` on firmware updates. If your settings disappear after an update, re-run the commands above.
+
+</details>
 
 ### Test External Access
 
@@ -892,6 +911,8 @@ From your phone on cellular data (not WiFi):
 - No ports exposed on your router (via Cloudflare Tunnel)
 
 **You're done!** The sections below (Backup, Utilities) are optional but recommended.
+
+Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).
 
 ---
 
@@ -998,3 +1019,7 @@ The *arr ecosystem includes other apps you can add using the same pattern:
 ## Further Reading
 
 - [TRaSH Guides](https://trash-guides.info/) — Quality profiles, naming conventions, and best practices for Sonarr, Radarr, and more
+
+---
+
+Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).

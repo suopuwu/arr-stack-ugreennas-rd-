@@ -10,29 +10,31 @@
 > docker compose -f docker-compose.arr-stack.yml up -d  # Recreates without full down
 > ```
 
-## Local Access (.lan domains)
+## Local Access
 
-Port-free access from any device on your LAN:
+Access services from your LAN. The `.lan` URLs require [+ local DNS setup](SETUP.md#local-dns-lan-domains---optional).
 
-| URL | Service |
-|-----|---------|
-| `http://jellyfin.lan` | Jellyfin |
-| `http://jellyseerr.lan` | Jellyseerr |
-| `http://sonarr.lan` | Sonarr |
-| `http://radarr.lan` | Radarr |
-| `http://prowlarr.lan` | Prowlarr |
-| `http://bazarr.lan` | Bazarr |
-| `http://qbit.lan` | qBittorrent |
-| `http://sabnzbd.lan` | SABnzbd |
-| `http://traefik.lan` | Traefik Dashboard |
-| `http://pihole.lan/admin` | Pi-hole |
-| `http://wg.lan` | WireGuard |
-| `http://uptime.lan` | Uptime Kuma |
-| `http://duc.lan` | duc (disk usage) |
+| Service | IP:port (always works) | .lan URL (if configured) |
+|---------|------------------------|--------------------------|
+| Jellyfin | `NAS_IP:8096` | `http://jellyfin.lan` |
+| Jellyseerr | `NAS_IP:5055` | `http://jellyseerr.lan` |
+| Sonarr | `NAS_IP:8989` | `http://sonarr.lan` |
+| Radarr | `NAS_IP:7878` | `http://radarr.lan` |
+| Prowlarr | `NAS_IP:9696` | `http://prowlarr.lan` |
+| Bazarr | `NAS_IP:6767` | `http://bazarr.lan` |
+| qBittorrent | `NAS_IP:8085` | `http://qbit.lan` |
+| SABnzbd | `NAS_IP:8082` | `http://sabnzbd.lan` |
+| Pi-hole | `NAS_IP:8081/admin` | `http://pihole.lan/admin` |
+| Traefik | — | `http://traefik.lan` |
+| WireGuard | `NAS_IP:51821` | `http://wg.lan` |
+| Uptime Kuma | `NAS_IP:3001` | `http://uptime.lan` |
+| duc | `NAS_IP:8838` | `http://duc.lan` |
 
-> **Setup required:** See [Local DNS section](SETUP.md#local-dns-lan-domains--optional) in Setup guide.
+> **Note:** Traefik dashboard is only accessible via `.lan` URL (requires + local DNS setup).
 
-## External Access (via Cloudflare Tunnel)
+## + remote access (external domains)
+
+Access from anywhere via HTTPS. **Requires [+ remote access setup](SETUP.md#external-access--optional).**
 
 | URL | Service | Auth |
 |-----|---------|------|
@@ -48,7 +50,8 @@ All other services are **LAN-only** (not exposed to internet).
 |---------|-----|------|-------|
 | Traefik | 172.20.0.2 | 80, 443 | Reverse proxy |
 | **Gluetun** | **172.20.0.3** | — | VPN gateway |
-| ↳ qBittorrent | (via Gluetun) | 8085 | Download client |
+| ↳ qBittorrent | (via Gluetun) | 8085 | Torrent downloads |
+| ↳ SABnzbd | (via Gluetun) | 8082 | Usenet downloads |
 | ↳ Sonarr | (via Gluetun) | 8989 | TV shows |
 | ↳ Radarr | (via Gluetun) | 7878 | Movies |
 | ↳ Prowlarr | (via Gluetun) | 9696 | Indexer manager |
@@ -58,7 +61,6 @@ All other services are **LAN-only** (not exposed to internet).
 | Jellyseerr | 172.20.0.8 | 5055 | Request management |
 | Bazarr | 172.20.0.9 | 6767 | Subtitles |
 | FlareSolverr | 172.20.0.10 | 8191 | Cloudflare bypass |
-| ↳ SABnzbd | (via Gluetun) | 8082 | Usenet downloads (VPN) |
 
 **+ remote access** (cloudflared.yml):
 
