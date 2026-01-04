@@ -149,7 +149,7 @@ See [Quick Reference](REFERENCE.md) for .lan URLs and network details.
 
 ## Step 1: Create Directories and Clone/Fork Repository
 
-First, set up the folder structure for your media and download the stack files to your NAS.
+First, set up the folder structure for your media and get the files from this GitHub repo onto your NAS.
 
 **Clone or Fork?**
 - **Clone** (simpler): Just want to use the stack, pull updates occasionally
@@ -375,6 +375,8 @@ Copy the output to `.env`: `TRAEFIK_DASHBOARD_AUTH=admin:$$apr1$$...`
 
 ## Step 3: Start the Stack
 
+Time to launch your containers and verify everything connects properly.
+
 ### 3.1 Create Docker Network
 
 All services need to talk to each other. This creates a private network with fixed IP addresses so containers can always find each other.
@@ -407,7 +409,7 @@ docker network create \
 docker compose -f docker-compose.arr-stack.yml up -d
 ```
 
-> **Adding .lan domains or remote access?** Deploy Traefik later in those sections.
+> **For + local DNS or + remote access:** Deploy Traefik in those sections.
 
 ### 3.3 Verify Deployment
 
@@ -428,11 +430,7 @@ docker exec gluetun wget -qO- ifconfig.me
 
 Your stack is running! Now configure each app to work together.
 
-### How Services Connect to Each Other
-
-VPN-protected services (qBittorrent, Sonarr, Radarr, Prowlarr, SABnzbd) share Gluetun's network. They use `localhost` to reach each other. Services outside Gluetun (like Jellyseerr) use `gluetun` as the hostname.
-
-See **[Quick Reference → Service Connection Guide](REFERENCE.md#service-connection-guide)** for the full address table.
+See **[Quick Reference → Service Connection Guide](REFERENCE.md#service-connection-guide)** for how services connect to each other.
 
 ### 4.1 Jellyfin (Media Server)
 
@@ -445,6 +443,8 @@ Streams your media library to any device.
    - TV Shows: Content type "Shows", Folder `/media/tv`
 
 ### 4.2 qBittorrent (Torrent Downloads)
+
+Receives download requests from Sonarr and Radarr and downloads files via torrents.
 
 1. **Access:** `http://HOST_IP:8085`
 2. **Get temporary password** (qBittorrent 4.6.1+ generates a random password):
@@ -471,7 +471,7 @@ Streams your media library to any device.
    - `sonarr` → Save path: `/downloads/sonarr`
    - `radarr` → Save path: `/downloads/radarr`
 
-> **Mobile access?** The default UI is poor on mobile. [VueTorrent](https://github.com/VueTorrent/VueTorrent) is pre-installed—enable it at Tools → Options → Web UI → Use alternative WebUI → `/vuetorrent`.
+> **Mobile access?** The default UI is poor on mobile. This stack includes [VueTorrent](https://github.com/VueTorrent/VueTorrent)—enable it at Tools → Options → Web UI → Use alternative WebUI → `/vuetorrent`.
 
 ### 4.3 SABnzbd (Usenet Downloads)
 
@@ -514,7 +514,7 @@ SABnzbd provides Usenet downloads as an alternative/complement to qBittorrent.
 
 ### 4.4 Sonarr (TV Shows)
 
-Automatically searches, downloads, and organizes TV shows.
+Searches for TV shows, sends download links to qBittorrent/SABnzbd, and organizes completed files.
 
 1. **Access:** `http://HOST_IP:8989`
 2. **Add Root Folder:** Settings → Media Management → `/tv`
@@ -540,7 +540,7 @@ Automatically searches, downloads, and organizes TV shows.
 
 ### 4.5 Radarr (Movies)
 
-Automatically searches, downloads, and organizes movies.
+Searches for movies, sends download links to qBittorrent/SABnzbd, and organizes completed files.
 
 1. **Access:** `http://HOST_IP:7878`
 2. **Add Root Folder:** Settings → Media Management → `/movies`
@@ -637,7 +637,7 @@ This gives Usenet a 30-minute head start before considering torrents.
 
 **Why Pi-hole in this stack?**
 - **DNS for VPN-routed services** — Prowlarr, Sonarr, Radarr etc. use Gluetun's network and need Pi-hole to resolve local hostnames
-- **Optional .lan domains** — access services via `http://sonarr.lan` instead of `http://192.168.0.10:8989`
+- **Optional .lan domains** — access services via `http://sonarr.lan` instead of `http://NAS_IP:8989`
 - **Optional network-wide DNS** — set your router to use Pi-hole for all devices (ad-blocking bonus)
 
 **Setup:**
@@ -651,6 +651,8 @@ This gives Usenet a 30-minute head start before considering torrents.
 ---
 
 ## Step 5: Check It Works
+
+Time to verify everything is connected and protected before you start adding content.
 
 ### VPN Test
 
@@ -683,7 +685,7 @@ docker exec qbittorrent wget -qO- ifconfig.me   # Same - confirms qBit uses VPN
 
 ## Local DNS (.lan domains) — Optional
 
-Access services without remembering port numbers: `http://sonarr.lan` instead of `http://10.10.0.10:8989`.
+Access services without remembering port numbers: `http://sonarr.lan` instead of `http://NAS_IP:8989`.
 
 This works by giving Traefik its own IP on your LAN via macvlan (a Docker network type that assigns a real LAN IP to a container). DNS resolves `.lan` domains to that IP.
 
