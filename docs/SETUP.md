@@ -1,6 +1,6 @@
 # Setup Guide
 
-Complete setup guide for the media automation stack. Works on any Docker host with platform-specific notes in collapsible sections.
+Everything you need to go from zero to streaming. Works on any NAS or Docker host.
 
 ## Table of Contents
 
