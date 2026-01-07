@@ -265,7 +265,7 @@ ls -ln /volume1/       # Shows folder owners as numbers (UID/GID)
 id                     # Shows YOUR user's UID/GID - these should match
 ```
 
-Usually 1000/1000 on Ugreen. If wrong, you'll see errors like "Folder '/tv/' is not writable by user 'abc'" in Sonarr/Radarr
+If wrong, you'll see errors like "Folder '/tv/' is not writable by user 'abc'" in Sonarr/Radarr.
 
 ### 2.4 Configure VPN
 
