@@ -110,6 +110,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+        restart: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -125,10 +126,11 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "curl -sf http://localhost:8085/ && wget -q --spider --timeout=5 http://www.google.com"]
+      interval: 2m
+      timeout: 15s
+      retries: 2
+      start_period: 60s
 
   # ═══════════════════════════════════════════════════════════════════════════
   # SABNZBD - Usenet download client. Downloads via VPN for extra security.
@@ -141,6 +143,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+        restart: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -154,10 +157,11 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ && wget -q --spider --timeout=5 http://www.google.com"]
       interval: 3m
-      timeout: 10s
+      timeout: 15s
       retries: 2
+      start_period: 60s
 
   # ═══════════════════════════════════════════════════════════════════════════
   # SONARR - TV show monitor. Watches for new episodes and sends to download.
@@ -170,6 +174,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+        restart: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -183,10 +188,11 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8989/"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8989/ && wget -q --spider --timeout=5 http://www.google.com"]
       interval: 2m
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 2
+      start_period: 60s
 
   # ═══════════════════════════════════════════════════════════════════════════
   # PROWLARR - Indexer manager. Finds download sources for Sonarr/Radarr.
@@ -199,6 +205,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+        restart: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -210,10 +217,11 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9696/"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9696/ && wget -q --spider --timeout=5 http://www.google.com"]
       interval: 2m
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 2
+      start_period: 60s
 
   # ═══════════════════════════════════════════════════════════════════════════
   # RADARR - Movie monitor. Watches for new movies and sends to download.
@@ -226,6 +234,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+        restart: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -239,10 +248,11 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7878/"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:7878/ && wget -q --spider --timeout=5 http://www.google.com"]
       interval: 2m
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 2
+      start_period: 60s
 
   # ═══════════════════════════════════════════════════════════════════════════
   # JELLYFIN - Media server. Stream your movies and TV shows like Netflix.
@@ -371,6 +381,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy  # Needs gluetun to reach Sonarr/Radarr
+        restart: true
     ports:
       - "5055:5055"  # Local network access (all interfaces)
     environment:
@@ -404,6 +415,7 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy  # Needs gluetun to reach Sonarr/Radarr
+        restart: true
     ports:
       - "6767:6767"  # Local network access
     environment:
