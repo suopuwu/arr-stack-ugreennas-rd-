@@ -27,7 +27,7 @@ Decide how you'll access your media stack:
 |-------|----------------|-------------------|----------|
 | **Core** | `192.168.1.50:8096` | Just `.env` + VPN credentials | Testing, single user |
 | **+ local DNS** | `jellyfin.lan` | Configure Pi-hole + add Traefik | Home/family use |
-| **+ remote access** | `jellyfin.yourdomain.com` | Add Cloudflare Tunnel | Watch from anywhere |
+| **+ remote access** | `jellyfin.yourdomain.com` | Add Cloudflare Tunnel | Watch/request from anywhere |
 
 **You can start simple and add features later.** The guide has checkpoints so you can stop at any level.
 
