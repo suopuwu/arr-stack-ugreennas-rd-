@@ -27,7 +27,7 @@ Decide how you'll access your media stack:
 |-------|----------------|-------------------|----------|
 | **Core** | `192.168.1.50:8096` | Just `.env` + VPN credentials | Testing, single user |
 | **+ local DNS** | `jellyfin.lan` | Configure Pi-hole + add Traefik | Home/family use |
-| **+ remote access** | `jellyfin.yourdomain.com` | Add Cloudflare Tunnel | Access from anywhere |
+| **+ remote access** | `jellyfin.yourdomain.com` | Add Cloudflare Tunnel | Watch from anywhere |
 
 **You can start simple and add features later.** The guide has checkpoints so you can stop at any level.
 
@@ -801,7 +801,7 @@ See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `
 
 **What's next?**
 - **Stop here** if local access is all you need
-- **Continue to [+ remote access](#-remote-access--optional)** for remote access from anywhere
+- **Continue to [+ remote access](#-remote-access--optional)** to watch from anywhere
 
 **Other docs:** [Upgrading](UPGRADING.md) · [Home Assistant Integration](HOME-ASSISTANT.md) · [Quick Reference](REFERENCE.md)
 
@@ -811,7 +811,7 @@ Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues
 
 ## + remote access — Optional
 
-Access your services from anywhere: `jellyfin.yourdomain.com` instead of only on your home network.
+Watch your media from anywhere: `jellyfin.yourdomain.com` instead of only on your home network.
 
 **Requirements:**
 - Buy a new, external domain name (~$10/year) — [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/) is simplest
@@ -927,7 +927,7 @@ From your phone on cellular data (not WiFi):
 ## ✅ + remote access Complete!
 
 **Congratulations!** You now have:
-- Remote access from anywhere via `yourdomain.com` (Cloudflare Tunnel)
+- Jellyfin and Jellyseerr accessible from anywhere via `yourdomain.com`
 - HTTPS encryption for all external traffic
 - No ports exposed on your router
 
