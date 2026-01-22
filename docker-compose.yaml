@@ -1,0 +1,276 @@
+
+#####################################################################
+# ⚠️  NEVER use 'docker compose down' - kills Pi-hole DNS!        #
+# ⚠️  You WILL lose internet before you can run 'up -d'           #
+#                                                                   #
+# ✅ Safe restart: docker compose -f docker-compose.arr-stack.yml up -d --force-recreate
+# ✅ Or use:       ./scripts/restart-stack.sh                      #
+#####################################################################
+
+#########################
+# Centralized Volumes   #
+#########################
+volumes:
+  sonarr-config:
+  prowlarr-config:
+  radarr-config:
+  jellyfin-config:
+  jellyfin-cache:
+  jellyseerr-config:
+  bazarr-config:
+  rdtclient-config:
+
+#########################
+# Networks              #
+#########################
+networks:
+  arr-stack:
+    name: arr-stack
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+#########################
+# Logging               #
+#########################
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+#########################
+# Services              #
+#########################
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # byparr - gets past cloudflare protections
+  # ═══════════════════════════════════════════════════════════════════════════
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    restart: always
+    init: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - arr-stack
+    ports:
+      - 8191:8191
+  # ═══════════════════════════════════════════════════════════════════════════
+  # rdt client - downloads from real debrid
+  # ═══════════════════════════════════════════════════════════════════════════
+  rdtclient:
+      image: rogerfar/rdtclient
+      container_name: rdtclient
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/Chicago
+      volumes:
+        - rdtclient-config:/data/db
+        - ${MEDIA_ROOT}/downloads:/data/downloads
+      logging:
+         driver: json-file
+         options:
+            max-size: 10m
+      ports:
+        - 6500:6500
+      networks:
+      - arr-stack
+      restart: always
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SONARR - TV show monitor. Watches for new episodes and sends to download.
+  # Access: sonarr.lan | sonarr.yourdomain.com | NAS_IP:8989
+  # ═══════════════════════════════════════════════════════════════════════════
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - sonarr-config:/config
+      - ${MEDIA_ROOT}/tv:/tv
+      - ${MEDIA_ROOT}/downloads:/downloads
+    ports:
+      - "8989:8989"
+    labels:
+      - deunhealth.restart.on.unhealthy=true
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8989/ && wget -q --spider --timeout=5 http://www.google.com"]
+      interval: 2m
+      timeout: 15s
+      retries: 2
+      start_period: 60s
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PROWLARR - Indexer manager. Finds download sources for Sonarr/Radarr.
+  # Access: prowlarr.lan | prowlarr.yourdomain.com | NAS_IP:9696
+  # ═══════════════════════════════════════════════════════════════════════════
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - prowlarr-config:/config
+    ports:
+      - "9696:9696"
+    labels:
+      - deunhealth.restart.on.unhealthy=true
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9696/ && wget -q --spider --timeout=5 http://www.google.com"]
+      interval: 2m
+      timeout: 15s
+      retries: 2
+      start_period: 60s
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # RADARR - Movie monitor. Watches for new movies and sends to download.
+  # Access: radarr.lan | radarr.yourdomain.com | NAS_IP:7878
+  # ═══════════════════════════════════════════════════════════════════════════
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - radarr-config:/config
+      - ${MEDIA_ROOT}/movies:/movies
+      - ${MEDIA_ROOT}/downloads:/downloads
+    ports:
+      - "7878:7878"
+    labels:
+      - deunhealth.restart.on.unhealthy=true
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:7878/ && wget -q --spider --timeout=5 http://www.google.com"]
+      interval: 2m
+      timeout: 15s
+      retries: 2
+      start_period: 60s
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JELLYFIN - Media server. Stream your movies and TV shows like Netflix.
+  # Access: jellyfin.lan | jellyfin.yourdomain.com | NAS_IP:8096
+  # ═══════════════════════════════════════════════════════════════════════════
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    ports:
+      - "8096:8096"     # Web UI
+      - "7359:7359/udp" # Client discovery (auto-detect on LAN)
+    environment:
+      - TZ=${TZ}
+    # Hardware transcoding (Intel Quick Sync) - remove these 4 lines if no Intel GPU
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "${RENDER_GROUP_ID:-0}"  # Find ID: getent group render | cut -d: -f3
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - ${MEDIA_ROOT}/movies:/media/movies:ro
+      - ${MEDIA_ROOT}/tv:/media/tv:ro
+    networks:
+      - arr-stack
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 1m
+      timeout: 30s
+      retries: 2
+      start_period: 30s
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JELLYSEERR - Request portal. Users request movies/shows here.
+  # Access: jellyseerr.lan | jellyseerr.yourdomain.com | NAS_IP:5055
+  # ═══════════════════════════════════════════════════════════════════════════
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    ports:
+      - "5055:5055"  # Local network access (all interfaces)
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+      - PORT=5055
+    networks:
+      - arr-stack
+
+    volumes:
+      - jellyseerr-config:/app/config
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5055/api/v1/status"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BAZARR - Subtitle manager. Automatically downloads subtitles.
+  # Access: bazarr.lan | bazarr.yourdomain.com | NAS_IP:6767
+  # ═══════════════════════════════════════════════════════════════════════════
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    ports:
+      - "6767:6767"  # Local network access
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - arr-stack
+    volumes:
+      - bazarr-config:/config
+      - ${MEDIA_ROOT}/movies:/movies
+      - ${MEDIA_ROOT}/tv:/tv
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6767/"]
+      interval: 3m
+      timeout: 10s
+      retries: 2
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FLARESOLVERR - Cloudflare bypass. Helps Prowlarr access protected sites.
+  # No web UI. Used internally by Prowlarr at 172.20.0.10:8191
+  # ═══════════════════════════════════════════════════════════════════════════
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    networks:
+      - arr-stack
+    labels:
+      - deunhealth.restart.on.unhealthy=true
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      # Actually test Chrome by making a solve request (catches Chrome crashes)
+      test: ["CMD", "curl", "-sf", "-X", "POST", "-H", "Content-Type: application/json",
+             "-d", "{\"cmd\":\"request.get\",\"url\":\"http://localhost:8191/\",\"maxTimeout\":30000}",
+             "http://localhost:8191/v1"]
+      interval: 10m
+      timeout: 60s
+      retries: 2
+      start_period: 2m
+
