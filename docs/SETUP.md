@@ -933,6 +933,8 @@ From your phone on cellular data (not WiFi):
 
 **You're done!** The sections below (Backup, Utilities) are optional but recommended.
 
+> **Need full network access remotely?** Cloudflare Tunnel only exposes HTTP services (Jellyfin, Jellyseerr). If you need to access admin UIs (Sonarr, Radarr, etc.) or `.lan` domains from outside your home, look into [Tailscale](https://tailscale.com/) — it's free for personal use and works even behind CGNAT. Setup is not covered here.
+
 Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).
 
 ---
