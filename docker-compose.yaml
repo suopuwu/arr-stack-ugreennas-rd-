@@ -19,6 +19,7 @@ volumes:
   jellyseerr-config:
   bazarr-config:
   rdtclient-config:
+  huntarr-config:
 
 #########################
 # Networks              #
@@ -43,6 +44,20 @@ x-logging: &default-logging
 # Services              #
 #########################
 services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # huntarr - fills in missing shows & upgrades
+  # ═══════════════════════════════════════════════════════════════════════════
+  huntarr:
+    image: huntarr/huntarr:latest
+    container_name: huntarr
+    restart: always
+    ports:
+      - "9705:9705"
+    volumes:
+      - huntarr-config:/config
+    environment:
+      - TZ=America/Chicago
+
   # ═══════════════════════════════════════════════════════════════════════════
   # byparr - gets past cloudflare protections
   # ═══════════════════════════════════════════════════════════════════════════
