@@ -1,8 +1,0 @@
-# Traefik routing for optional utilities
-#
-# NOTE: Most utilities are local-only (no Traefik routing) for security:
-# - duc: No auth, exposes filesystem structure → http://NAS_IP:8838
-# - uptime-kuma: Exposes infrastructure details → http://NAS_IP:3001
-#
-# Access these via local network or WireGuard VPN.
-# Add routers here only for services that genuinely need remote access.
